@@ -19,7 +19,7 @@ export const appSlice = createSlice({
   initialState,
   reducers: {
     setAccessToken(state, action: PayloadAction<string>) {
-      state.accessToken = action.payload;
+      state.accessToken = (sessionStorage["mmf_access_token"] = action.payload);
     },
   },
   extraReducers(builder) {
