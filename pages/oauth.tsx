@@ -27,7 +27,7 @@ export async function getServerSideProps(context: NextPageContext) {
   const code = context.query["code"];
   console.log(code);
 
-  const buf = Buffer.from("mmg-browser:d5PSKTnrahheJCNK7z2d18gsiE0MaA");
+  const buf = Buffer.from(process.env.CLIENT_ID + ":" + process.env.CLIENT_SECRET);
   const auth = buf.toString("base64");
 
   const url = `https://auth.myminifactory.com/v1/oauth/tokens`;
