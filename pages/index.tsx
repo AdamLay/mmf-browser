@@ -40,21 +40,21 @@ const Home: NextPage = () => {
     return _.groupBy(unique, (x) => x.user_name);
   }, [searchText, appState.items]);
 
-  useEffect(() => {
-    if (isServerSide()) return;
-    const sessionToken = sessionStorage["mmf_access_token"];
+  // useEffect(() => {
+  //   if (isServerSide()) return;
+  //   const sessionToken = sessionStorage["mmf_access_token"];
 
-    if (!authenticated) {
-      if (sessionToken) {
-        dispatch(setAccessToken(sessionToken));
-      } else {
-        const url =
-          "https://auth.myminifactory.com/web/authorize?client_id=mmg-browser&redirect_uri=http://localhost:3000/oauth&response_type=code&scope=download&state=" +
-          nanoid();
-        router.push(url);
-      }
-    }
-  }, [authenticated]);
+  //   if (!authenticated) {
+  //     if (sessionToken) {
+  //       dispatch(setAccessToken(sessionToken));
+  //     } else {
+  //       const url =
+  //         "https://auth.myminifactory.com/web/authorize?client_id=mmg-browser&redirect_uri=http://localhost:3000/oauth&response_type=code&scope=download&state=" +
+  //         nanoid();
+  //       router.push(url);
+  //     }
+  //   }
+  // }, [authenticated]);
 
   const onLoad = () => {
     localStorage["mmf_lastSessid"] = sessid;
