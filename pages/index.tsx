@@ -58,7 +58,7 @@ const Home: NextPage = () => {
 
   const onLoad = () => {
     dispatch(getShared(sessid));
-  }
+  };
 
   async function loadGroup(group: any) {
     dispatch(getGroup(group.id));
@@ -89,7 +89,9 @@ const Home: NextPage = () => {
               />
             </Grid>
             <Grid item xs={6}>
-              <Button variant="outlined" sx={{mt:1}} onClick={onLoad}>Load</Button>
+              <Button variant="outlined" sx={{ mt: 1 }} onClick={onLoad}>
+                Load
+              </Button>
             </Grid>
           </Grid>
         </Box>
@@ -111,12 +113,12 @@ const Home: NextPage = () => {
         {Object.keys(groups).map((key) => {
           const groupItems = groups[key];
           return (
-            <Accordion defaultExpanded={true}>
+            <Accordion key={key} defaultExpanded={true}>
               <AccordionSummary>{key}</AccordionSummary>
               <AccordionDetails>
                 <Grid container spacing={2}>
                   {groupItems.map((item: any) => (
-                    <Grid item xs={6} sm={3}>
+                    <Grid key={item.id} item xs={6} sm={3}>
                       <img src={item.obj_img} />
                       <p>{item.name}</p>
                     </Grid>
@@ -127,10 +129,10 @@ const Home: NextPage = () => {
           );
         })}
         {appState.shared?.items.map((item: any) => (
-          <div>
+          <div key={item.id}>
             <p>{item.name}</p>
             {item.groups.items.map((group: any) => (
-              <div>
+              <div key={group.id}>
                 <Button onClick={() => loadGroup(group)}>{group.name}</Button>
               </div>
             ))}
