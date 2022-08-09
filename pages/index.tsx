@@ -25,7 +25,7 @@ const isServerSide = () => typeof window === "undefined";
 const Home: NextPage = () => {
   const appState = useSelector((state: RootState) => state.app);
   const [searchText, setSearchText] = useState("");
-  const [sessid, setSessid] = useState("");
+  const [sessid, setSessid] = useState(localStorage["mmf_lastSessid"]);
   const router = useRouter();
   const dispatch = useAppDispatch();
 
@@ -57,6 +57,7 @@ const Home: NextPage = () => {
   }, [authenticated]);
 
   const onLoad = () => {
+    localStorage["mmf_lastSessid"] = sessid;
     dispatch(getShared(sessid));
   };
 
@@ -128,7 +129,7 @@ const Home: NextPage = () => {
             </Accordion>
           );
         })}
-        {appState.shared?.items.map((item: any) => (
+        {/* {appState.shared?.items.map((item: any) => (
           <div key={item.id}>
             <p>{item.name}</p>
             {item.groups.items.map((group: any) => (
@@ -137,7 +138,7 @@ const Home: NextPage = () => {
               </div>
             ))}
           </div>
-        ))}
+        ))} */}
       </Container>
     </>
   );
