@@ -61,6 +61,18 @@ export const getShared = createAsyncThunk("app/getShared", async (sessid: string
   return { res, sessid };
 });
 
+export const getCampaigns = createAsyncThunk("app/getCampaigns", async (sessid: string, { dispatch, getState }) => {
+  var res = await get("/api/proxy?action=campaigns", sessid);
+  for (let item of res.items) {
+    for (let group of item.pledges.items.filter((x: any) => x.name !== "All")) {
+      console.log("Campaign item group", group);
+      dispatch(getGroup(group.id));
+    }
+    //console.log("Campaign item", item);
+  }
+  return { res, sessid };
+});
+
 export const appSlice = createSlice({
   name: "app",
   initialState,

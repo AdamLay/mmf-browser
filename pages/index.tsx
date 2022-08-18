@@ -15,7 +15,7 @@ import {
   Toolbar,
   Typography,
 } from "@mui/material";
-import { getGroup, getShared, setAccessToken } from "../data/appSlice";
+import { getCampaigns, getGroup, getShared, setAccessToken } from "../data/appSlice";
 import _ from "lodash";
 import { Box, Container } from "@mui/system";
 import dynamic from "next/dynamic";
@@ -59,11 +59,9 @@ const Home: NextPage = () => {
   const onLoad = () => {
     localStorage["mmf_lastSessid"] = sessid;
     dispatch(getShared(sessid));
+    dispatch(getCampaigns(sessid));
   };
 
-  async function loadGroup(group: any) {
-    dispatch(getGroup(group.id));
-  }
 
   return (
     <>
@@ -120,7 +118,7 @@ const Home: NextPage = () => {
                 <Grid container spacing={2}>
                   {groupItems.map((item: any) => (
                     <Grid key={item.id} item xs={6} sm={3}>
-                      <img src={item.obj_img} />
+                      <img src={item.obj_img} onClick={() => window.open(item["download_url"], "_blank")} />
                       <p>{item.name}</p>
                     </Grid>
                   ))}
