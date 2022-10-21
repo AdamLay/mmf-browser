@@ -26,15 +26,15 @@ const get = async (url: string, sessid: string) => {
   return await res.json();
 };
 
-export const getGroup = createAsyncThunk("app/getGroup", async (id: string, { getState }) => {
+export const getGroup = createAsyncThunk("app/getGroup", async ({ id, sessid }: { id: string, sessid: string }, { getState }) => {
+  console.log("getGroup sessid", sessid);
   const local = localStorage["mmf_group_" + id];
   if (local) {
     return JSON.parse(local);
   }
-  const state: AppState = (getState() as RootState).app;
   const items = [];
   const getPage = async (page: number) => {
-    return await get("/api/proxy?action=group/" + id + "%3Fpage%3D" + page, state!.sessid);
+    return await get("/api/proxy?action=group/" + id + "%3Fpage%3D" + page, sessid);
   }
   var page = 1;
   let maxPage = 1;
@@ -52,21 +52,22 @@ export const getGroup = createAsyncThunk("app/getGroup", async (id: string, { ge
 });
 
 export const getShared = createAsyncThunk("app/getShared", async (sessid: string, { dispatch, getState }) => {
-  var res = await get("/api/proxy?action=shared", sessid);
+  const res = await get("/api/proxy?action=shared", sessid);
   for (let item of res.items) {
     for (let group of item.groups.items.filter((x: any) => x.name !== "All")) {
-      dispatch(getGroup(group.id));
+      await dispatch(getGroup({ id: group.id, sessid }));
     }
   }
   return { res, sessid };
 });
 
 export const getCampaigns = createAsyncThunk("app/getCampaigns", async (sessid: string, { dispatch, getState }) => {
-  var res = await get("/api/proxy?action=campaigns", sessid);
+  console.log("getCampaigns sessid", sessid);
+  const res = await get("/api/proxy?action=campaigns", sessid);
   for (let item of res.items) {
     for (let group of item.pledges.items.filter((x: any) => x.name !== "All")) {
       console.log("Campaign item group", group);
-      dispatch(getGroup(group.id));
+      await dispatch(getGroup({ id: group.id, sessid }));
     }
     //console.log("Campaign item", item);
   }
