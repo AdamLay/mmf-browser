@@ -94,6 +94,7 @@ const Home: NextPage = () => {
               </Button>
             </Grid>
           </Grid>
+          <Typography>Find this in https://www.myminifactory.com/ - go to <code>Dev Tools -&gt; Application -&gt; Cookies -&gt; SESSID</code></Typography>
         </Box>
         <Box mb={2}>
           <Grid container spacing={2}>
