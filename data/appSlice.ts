@@ -51,6 +51,31 @@ export const getGroup = createAsyncThunk("app/getGroup", async ({ id, sessid }: 
   return items;
 });
 
+export const getTribeRewards = createAsyncThunk("app/getTribeRewards", async ({ id, sessid }: { id: string, sessid: string }, { getState }) => {
+  console.log("getGroup sessid", sessid);
+  const local = localStorage["mmf_tribe_" + id];
+  if (local) {
+    return JSON.parse(local);
+  }
+  const items = [];
+  const getPage = async (page: number) => {
+    return await get("/api/proxy?action=tribes%2Frewards%2Frelease%2F" + id + "%3Fpage%3D" + page, sessid);
+  }
+  var page = 1;
+  let maxPage = 1;
+  var res = await getPage(page);
+  items.push(...res.items);
+  if (res["total_count"] > 20) {
+    maxPage = Math.ceil(res["total_count"] / 20);
+    while (page < maxPage) {
+      var pageRes = await getPage(++page);
+      items.push(...pageRes.items)
+    }
+  }
+  localStorage["mmf_tribe_" + id] = JSON.stringify(items);
+  return items;
+});
+
 export const getShared = createAsyncThunk("app/getShared", async (sessid: string, { dispatch, getState }) => {
   const res = await get("/api/proxy?action=shared", sessid);
   for (let item of res.items) {
@@ -74,6 +99,19 @@ export const getCampaigns = createAsyncThunk("app/getCampaigns", async (sessid: 
   return { res, sessid };
 });
 
+export const getTribes = createAsyncThunk("app/getTribes", async (sessid: string, { dispatch, getState }) => {
+  console.log("getTribes sessid", sessid);
+  const res = await get("/api/proxy?action=tribes", sessid);
+  for (let item of res.items) {
+    for (let group of item.groups.items.filter((x: any) => x.name !== "All")) {
+      console.log("Tribes item group", group);
+      await dispatch(getTribeRewards({ id: group.id, sessid }));
+    }
+    //console.log("Campaign item", item);
+  }
+  return { res, sessid };
+});
+
 export const appSlice = createSlice({
   name: "app",
   initialState,
@@ -91,6 +129,10 @@ export const appSlice = createSlice({
       state.loading = false;
     });
     builder.addCase(getGroup.fulfilled, (state, action: PayloadAction<any[]>) => {
+      state.items.push(...action.payload);
+      state.loading = false;
+    });
+    builder.addCase(getTribeRewards.fulfilled, (state, action: PayloadAction<any[]>) => {
       state.items.push(...action.payload);
       state.loading = false;
     });
