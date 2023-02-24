@@ -1,7 +1,6 @@
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
-import { nanoid } from "nanoid";
 import { useSelector } from "react-redux";
 import { RootState, useAppDispatch } from "../data/store";
 import {
@@ -9,13 +8,14 @@ import {
   AccordionDetails,
   AccordionSummary,
   AppBar,
+  Autocomplete,
   Button,
   Grid,
   TextField,
   Toolbar,
   Typography,
 } from "@mui/material";
-import { getCampaigns, getTribes, getShared, setAccessToken } from "../data/appSlice";
+import { getCampaigns, getTribes, getShared, setAccessToken, getPurchases } from "../data/appSlice";
 import _ from "lodash";
 import { Box, Container } from "@mui/system";
 import dynamic from "next/dynamic";
@@ -25,20 +25,26 @@ const isServerSide = () => typeof window === "undefined";
 const Home: NextPage = () => {
   const appState = useSelector((state: RootState) => state.app);
   const [searchText, setSearchText] = useState("");
+  const [creators, setCreators] = useState<string[]>([]);
   const [sessid, setSessid] = useState(localStorage["mmf_lastSessid"] || "");
   const router = useRouter();
   const dispatch = useAppDispatch();
 
   const authenticated = appState.accessToken;
 
+  const creatorNames = useMemo(() => _.chain(appState.items).uniqBy(x => x.user_name).map(x => x.user_name).orderBy(x => x).value(), [appState.items]);
+console.log(creatorNames)
   const groups = useMemo(() => {
     const filtered = appState.items.filter(
-      (x: any) => !searchText || x.name.toLowerCase().indexOf(searchText) > -1
+      (x: any) => {
+        const searchValid = !searchText || x.name.toLowerCase().indexOf(searchText) > -1;
+        const creatorValid = creators.length === 0 || creators.includes(x.user_name);
+        return searchValid && creatorValid;
+      }
     );
     const unique = _.uniqBy(filtered, (x) => x.name);
-    //_.sortBy(unique, (x) => x.name);
     return _.groupBy(unique, (x) => x.user_name);
-  }, [searchText, appState.items]);
+  }, [searchText, creators, appState.items]);
 
   useEffect(() => {
     if (isServerSide()) return;
@@ -61,8 +67,8 @@ const Home: NextPage = () => {
     dispatch(getShared(sessid));
     dispatch(getCampaigns(sessid));
     dispatch(getTribes(sessid));
+    //dispatch(getPurchases(sessid));
   };
-
 
   return (
     <>
@@ -94,7 +100,7 @@ const Home: NextPage = () => {
               </Button>
             </Grid>
           </Grid>
-          <Typography>Find this in https://www.myminifactory.com/ - go to <code>Dev Tools -&gt; Application -&gt; Cookies -&gt; SESSID</code></Typography>
+          <Typography>Find this in https://www.myminifactory.com/ - go to <code>Dev Tools (F12) -&gt; Application -&gt; Cookies -&gt; SESSID</code></Typography>
         </Box>
         <Box mb={2}>
           <Grid container spacing={2}>
@@ -109,10 +115,18 @@ const Home: NextPage = () => {
                 fullWidth
               />
             </Grid>
+            <Grid item xs={6}>
+              <Autocomplete
+                options={creatorNames}
+                value={creators}
+                onChange={(e, newValue) => setCreators(newValue)}
+                multiple
+                renderInput={(params) => <TextField {...params} label="Creator" />} />
+            </Grid>
           </Grid>
         </Box>
         {Object.keys(groups).map((key) => {
-          const groupItems = groups[key];
+          const groupItems = _.orderBy(groups[key], x => x.id, "desc");
           return (
             <Accordion key={key} defaultExpanded={true}>
               <AccordionSummary>{key}</AccordionSummary>

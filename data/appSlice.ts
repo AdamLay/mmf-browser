@@ -76,6 +76,26 @@ export const getTribeRewards = createAsyncThunk("app/getTribeRewards", async ({ 
   return items;
 });
 
+export const getPurchases = createAsyncThunk("app/getPurchases", async ({ sessid }: { sessid: string }, { getState }) => {
+  console.log("getPurchases sessid", sessid);
+  const items = [];
+  const getPage = async (page: number) => {
+    return await get("/api/proxy?action=purchases%3Fpage%3D" + page, sessid);
+  }
+  var page = 1;
+  let maxPage = 1;
+  var res = await getPage(page);
+  items.push(...res.items);
+  if (res["total_count"] > 20) {
+    maxPage = Math.ceil(res["total_count"] / 20);
+    while (page < maxPage) {
+      var pageRes = await getPage(++page);
+      items.push(...pageRes.items)
+    }
+  }
+  return items;
+});
+
 export const getShared = createAsyncThunk("app/getShared", async (sessid: string, { dispatch, getState }) => {
   const res = await get("/api/proxy?action=shared", sessid);
   for (let item of res.items) {
@@ -133,6 +153,10 @@ export const appSlice = createSlice({
       state.loading = false;
     });
     builder.addCase(getTribeRewards.fulfilled, (state, action: PayloadAction<any[]>) => {
+      state.items.push(...action.payload);
+      state.loading = false;
+    });
+    builder.addCase(getPurchases.fulfilled, (state, action: PayloadAction<any[]>) => {
       state.items.push(...action.payload);
       state.loading = false;
     });

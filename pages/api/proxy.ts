@@ -18,6 +18,9 @@ const get = async (url: string, sessid: string) => {
       cookie: "SESSID=" + sessid,
     },
   });
+  if (url.includes("purchase")) {
+    console.log(await res.text())
+  }
   if (res.status === 200)
     return await res.json();
   var text = await res.text();
